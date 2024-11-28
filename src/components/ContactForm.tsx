@@ -13,6 +13,7 @@ const ContactForm: FC<ContactFormProps> = ({
   dataToEdit,
   toggleModal
 }) => {
+  const [errorMessage, setErrorMessage] = useState('')
   const [contact, setContact] = useState({
     nome: dataToEdit?.nome ? dataToEdit.nome : '',
     sobrenome: dataToEdit?.sobrenome ? dataToEdit.sobrenome : '',
@@ -32,6 +33,21 @@ const ContactForm: FC<ContactFormProps> = ({
 
   const handleOnSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const { nome, sobrenome, telefone, email } = contact
+    if (
+      nome.trim() === '' ||
+      sobrenome.trim() === '' ||
+      telefone.trim() === '' ||
+      email.trim() === ''
+    ) {
+      setErrorMessage('Todos os campos são obridatórios.')
+      return
+    } else if (telefone.length < 3) {
+      setErrorMessage(
+        'Por favor, insira um número de telefone com mais de 3 digitos.'
+      )
+      return
+    }
     if (!dataToEdit) {
       dispatch({
         type: 'ADD_CONTACT',
@@ -46,6 +62,7 @@ const ContactForm: FC<ContactFormProps> = ({
         telefone: '',
         email: ''
       })
+      setErrorMessage('')
     } else {
       dispatch({
         type: 'UPDATE_CONTACT',
@@ -64,6 +81,7 @@ const ContactForm: FC<ContactFormProps> = ({
   return (
     <Form onSubmit={handleOnSubmit} className="contact-form">
       <h3 className="mb-3">Adicionar Novo Contato</h3>
+      {errorMessage && <p className="errorMsg">{errorMessage}</p>}
       <Form.Group controlId="nome">
         <Form.Label>Nome</Form.Label>
         <Form.Control
