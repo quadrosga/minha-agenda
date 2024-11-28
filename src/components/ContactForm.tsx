@@ -1,8 +1,13 @@
 import React, { FC, ChangeEvent, useState, FormEventHandler } from 'react'
 import { Button, Form } from 'react-bootstrap'
+import { Action } from '../types'
 
-// Criando um state 'contact' para armazenar os valores dos inputs
-const ContactForm: FC = () => {
+interface ContactFormProps {
+  dispatch: React.Dispatch<Action>
+}
+
+const ContactForm: FC<ContactFormProps> = (props) => {
+  const { dispatch } = props
   const [contact, setContact] = useState({
     nome: '',
     sobrenome: '',
@@ -27,8 +32,14 @@ const ContactForm: FC = () => {
   // Definindo função para evitar o comportamento padrão do submit
   const handleOnSubmit: FormEventHandler<HTMLElement> = (e) => {
     e.preventDefault()
-    console.log('Contact:', contact)
-    // TODO: implementar logica de submit
+
+    dispatch({
+      type: 'ADD_CONTACT',
+      payload: {
+        id: Date.now(),
+        ...contact
+      }
+    })
   }
 
   return (
