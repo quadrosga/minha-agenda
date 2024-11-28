@@ -1,4 +1,4 @@
-import { Contact, Action } from '../types'
+import { Contact, Action, Update } from '../types'
 
 // Definindo interface cuja propriedade contacts recebe um array de objetos Contact
 // AppState é o estado da aplicação que o Reducer administrará
@@ -17,8 +17,30 @@ export const contactsReducer = (state: AppState, action: Action): AppState => {
     case 'ADD_CONTACT':
       return {
         ...state,
-        contacts: [...state.contacts, action.payload]
+        contacts: [...state.contacts, action.payload as Contact]
       }
+    case 'UPDATE_CONTACT': {
+      const { id, updates } = action.payload as Update
+      return {
+        ...state,
+        contacts: state.contacts.map((contact) => {
+          if (contact.id === id) {
+            return {
+              ...contact,
+              ...updates
+            }
+          }
+          return contact
+        })
+      }
+    }
+    case 'DELETE_CONTACT': {
+      const { id } = action.payload
+      return {
+        ...state,
+        contacts: state.contacts.filter((contact) => contact.id !== id)
+      }
+    }
     default:
       return state
   }

@@ -8,7 +8,12 @@ export interface Contact {
   email: string
 }
 
+export interface Update {
+  id: number
+  updates?: Contact
+}
+
 export interface Action {
-  type: string
-  payload: Contact
+  type: 'ADD_CONTACT' | 'UPDATE_CONTACT' | 'DELETE_CONTACT'
+  payload: Contact | Update
 }

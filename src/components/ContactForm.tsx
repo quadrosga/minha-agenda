@@ -1,24 +1,25 @@
-import React, { FC, ChangeEvent, useState, FormEventHandler } from 'react'
+import React, { FC, ChangeEvent, useState } from 'react'
+import { Action, Contact } from '../types'
 import { Button, Form } from 'react-bootstrap'
-import { Action } from '../types'
 
 interface ContactFormProps {
   dispatch: React.Dispatch<Action>
+  dataToEdit: Contact | undefined
+  toggleModal: () => void
 }
 
-const ContactForm: FC<ContactFormProps> = (props) => {
-  const { dispatch } = props
+const ContactForm: FC<ContactFormProps> = ({
+  dispatch,
+  dataToEdit,
+  toggleModal
+}) => {
   const [contact, setContact] = useState({
-    nome: '',
-    sobrenome: '',
-    telefone: '',
-    email: ''
+    nome: dataToEdit?.nome ? dataToEdit.nome : '',
+    sobrenome: dataToEdit?.sobrenome ? dataToEdit.sobrenome : '',
+    telefone: dataToEdit?.telefone ? dataToEdit.telefone : '',
+    email: dataToEdit?.email ? dataToEdit.email : ''
   })
 
-  // Definindo função chamada sempre que o usuário digita no input
-  // desestruturação para pegar nome e valor do objeto target (o input)
-  // setContact atualiza o contact state, retornando um novo objeto com mesmas
-  // propriedades que o objeto prévio, mas com novo valor na propriedade name
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setContact((prevState) => {
@@ -29,29 +30,47 @@ const ContactForm: FC<ContactFormProps> = (props) => {
     })
   }
 
-  // Definindo função para evitar o comportamento padrão do submit
-  const handleOnSubmit: FormEventHandler<HTMLElement> = (e) => {
-    e.preventDefault()
-
-    dispatch({
-      type: 'ADD_CONTACT',
-      payload: {
-        id: Date.now(),
-        ...contact
-      }
-    })
+  const handleOnSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!dataToEdit) {
+      dispatch({
+        type: 'ADD_CONTACT',
+        payload: {
+          id: Date.now(),
+          ...contact
+        }
+      })
+      setContact({
+        nome: '',
+        sobrenome: '',
+        telefone: '',
+        email: ''
+      })
+    } else {
+      dispatch({
+        type: 'UPDATE_CONTACT',
+        payload: {
+          id: dataToEdit.id,
+          updates: {
+            id: Date.now(),
+            ...contact
+          }
+        }
+      })
+      toggleModal()
+    }
   }
 
   return (
     <Form onSubmit={handleOnSubmit} className="contact-form">
       <h3 className="mb-3">Adicionar Novo Contato</h3>
       <Form.Group controlId="nome">
-        <Form.Label>Primeiro Nome</Form.Label>
+        <Form.Label>Nome</Form.Label>
         <Form.Control
           name="nome"
           value={contact.nome}
           type="text"
-          placeholder="Digite o primeiro nome"
+          placeholder="Insira o primeiro nome"
           onChange={handleOnChange}
         />
       </Form.Group>
@@ -61,7 +80,7 @@ const ContactForm: FC<ContactFormProps> = (props) => {
           name="sobrenome"
           value={contact.sobrenome}
           type="text"
-          placeholder="Digite o sobrenome"
+          placeholder="Insira o sobrenome"
           onChange={handleOnChange}
         />
       </Form.Group>
@@ -71,7 +90,7 @@ const ContactForm: FC<ContactFormProps> = (props) => {
           name="telefone"
           value={contact.telefone}
           type="text"
-          placeholder="Digite o número de telefone"
+          placeholder="Insira o número de telefone"
           onChange={handleOnChange}
         />
       </Form.Group>
@@ -80,14 +99,15 @@ const ContactForm: FC<ContactFormProps> = (props) => {
         <Form.Control
           name="email"
           value={contact.email}
-          type="text"
-          placeholder="Digite o endereço de email"
+          type="email"
+          placeholder="Insira o endereço de email"
           onChange={handleOnChange}
         />
       </Form.Group>
+
       <div className="d-flex justify-content-end">
         <Button variant="primary" type="submit" className="submit-btn">
-          Adicionar contato
+          {dataToEdit ? 'Atualizar Contato' : 'Adicionar Contato'}
         </Button>
       </div>
     </Form>
